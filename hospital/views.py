@@ -1,5 +1,5 @@
-from django.shortcuts import render,redirect,reverse
-from . import forms,models
+from django.shortcuts import render,redirect, reverse
+from . import forms, models
 from django.db.models import Sum
 from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
@@ -15,13 +15,11 @@ def home_view(request):
         return HttpResponseRedirect('afterlogin')
     return render(request,'hospital/index.html')
 
-
 #for showing signup/login button for admin(by Bharat)
 def adminclick_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('afterlogin')
     return render(request,'hospital/adminclick.html')
-
 
 #for showing signup/login button for doctor(by Bharat)
 def doctorclick_view(request):
@@ -29,15 +27,11 @@ def doctorclick_view(request):
         return HttpResponseRedirect('afterlogin')
     return render(request,'hospital/doctorclick.html')
 
-
 #for showing signup/login button for patient(by Bharat)
 def patientclick_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('afterlogin')
     return render(request,'hospital/patientclick.html')
-
-
-
 
 def admin_signup_view(request):
     form=forms.AdminSigupForm()
@@ -51,9 +45,6 @@ def admin_signup_view(request):
             my_admin_group[0].user_set.add(user)
             return HttpResponseRedirect('adminlogin')
     return render(request,'hospital/adminsignup.html',{'form':form})
-
-
-
 
 def doctor_signup_view(request):
     userForm=forms.DoctorUserForm()
@@ -73,7 +64,6 @@ def doctor_signup_view(request):
             my_doctor_group[0].user_set.add(user)
         return HttpResponseRedirect('doctorlogin')
     return render(request,'hospital/doctorsignup.html',context=mydict)
-
 
 def patient_signup_view(request):
     userForm=forms.PatientUserForm()
@@ -95,11 +85,6 @@ def patient_signup_view(request):
         return HttpResponseRedirect('patientlogin')
     return render(request,'hospital/patientsignup.html',context=mydict)
 
-
-
-
-
-
 #-----------for checking user is doctor , patient or admin(by Bharat)
 def is_admin(user):
     return user.groups.filter(name='ADMIN').exists()
@@ -107,7 +92,6 @@ def is_doctor(user):
     return user.groups.filter(name='DOCTOR').exists()
 def is_patient(user):
     return user.groups.filter(name='PATIENT').exists()
-
 
 #---------AFTER ENTERING CREDENTIALS WE CHECK WHETHER USERNAME AND PASSWORD IS OF ADMIN,DOCTOR OR PATIENT
 def afterlogin_view(request):
@@ -125,14 +109,9 @@ def afterlogin_view(request):
             return redirect('patient-dashboard')
         else:
             return render(request,'hospital/patient_wait_for_approval.html')
-
-
-
-
-
-
-
-
+    else:
+        return redirect('logout')
+    
 #---------------------------------------------------------------------------------
 #------------------------ ADMIN RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
@@ -151,6 +130,7 @@ def admin_dashboard_view(request):
 
     appointmentcount=models.Appointment.objects.all().filter(status=True).count()
     pendingappointmentcount=models.Appointment.objects.all().filter(status=False).count()
+    
     mydict={
     'doctors':doctors,
     'patients':patients,
@@ -170,15 +150,11 @@ def admin_dashboard_view(request):
 def admin_doctor_view(request):
     return render(request,'hospital/admin_doctor.html')
 
-
-
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
 def admin_view_doctor_view(request):
     doctors=models.Doctor.objects.all().filter(status=True)
     return render(request,'hospital/admin_view_doctor.html',{'doctors':doctors})
-
-
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
@@ -188,8 +164,6 @@ def delete_doctor_from_hospital_view(request,pk):
     user.delete()
     doctor.delete()
     return redirect('admin-view-doctor')
-
-
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
@@ -448,15 +422,12 @@ def discharge_patient_view(request,pk):
         return render(request,'hospital/patient_final_bill.html',context=patientDict)
     return render(request,'hospital/patient_generate_bill.html',context=patientDict)
 
-
-
 #--------------for discharge patient bill (pdf) download and printing
 import io
 from xhtml2pdf import pisa
 from django.template.loader import get_template
 from django.template import Context
 from django.http import HttpResponse
-
 
 def render_to_pdf(template_src, context_dict):
     template = get_template(template_src)
